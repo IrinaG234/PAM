@@ -1,64 +1,62 @@
 import 'package:flutter/material.dart';
-//datorita la asta se face run(se activeaza tot neceesarul)
+
 void main() {
   runApp(const MyApp());
 }
-//config aplicatia global si e static/baza(titli,tema,culor,ecran de start)
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Reducere calculator',
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const CalculatorReducerePage(),
     );
   }
 }
-//definește pagina si se poate schimba
+
 class CalculatorReducerePage extends StatefulWidget {
   const CalculatorReducerePage({super.key});
 
   @override
-  State<CalculatorReducerePage> createState() => _CalculatorReducerePageState();
+  State<CalculatorReducerePage> createState() =>
+      _CalculatorReducerePageState();
 }
 
-//logica de actualizarea
 class _CalculatorReducerePageState extends State<CalculatorReducerePage> {
-  final TextEditingController _priceController=TextEditingController();
-  final TextEditingController _discountController=TextEditingController();
-  String _result='';
-  TipReducere _tipSelectat = TipReducere.procent;
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _discountController = TextEditingController();
+  String _result = '';
+
+  final List<int> _optiuniProcent = [5, 10, 15, 20, 25, 30, 50];
 
   void _calculateDiscount() {
-    final double? price=double.tryParse(_priceController.text);
-    final double? discountPercent= double.tryParse(_discountController.text);
+    final double? price = double.tryParse(_priceController.text);
+    final double? discountPercent = double.tryParse(_discountController.text);
 
-    if (price==null || discountPercent==null){
+    if (price == null || discountPercent == null) {
       setState(() {
-        _result="introdu valoare";
+        _result = 'Introdu valori numerice valide.';
       });
       return;
     }
 
-    final double discountValue=price*(discountPercent/100);
-    final double finalPrice=price-discountValue;
+    final double discountValue = price * (discountPercent / 100);
+    final double finalPrice = price - discountValue;
 
     setState(() {
-      _result=
-      'valoarea: ${discountValue.toStringAsFixed(2)} lei\n'
-      'pret final: ${finalPrice.toStringAsFixed(2)} lei\n';
+      _result =
+      'Valoarea: ${discountValue.toStringAsFixed(2)} lei\n'
+          'Preț final: ${finalPrice.toStringAsFixed(2)} lei';
     });
   }
 
-
-//controalele se clenuieste
   @override
-  void dispose(){
+  void dispose() {
     _priceController.dispose();
     _discountController.dispose();
     super.dispose();
@@ -66,30 +64,50 @@ class _CalculatorReducerePageState extends State<CalculatorReducerePage> {
 
   @override
   Widget build(BuildContext context) {
-     return Scaffold(
-     appBar: AppBar(title: const Text('Calculator de reducere')),
-     body: Column(
-     children: [
-       TextField(
-         controller: _priceController,
-         decoration: const InputDecoration(
-           labelText: 'Preț inițial (lei)',
-         ),
-       ),
-       const SizedBox(height: 12),
-       TextField(
-         controller: _discountController,
-         decoration: const InputDecoration(
-           labelText: 'Procentul reducerii (%)',
-         ),
-       ),
-           ElevatedButton(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Calculator de reducere')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _priceController,
+              decoration: const InputDecoration(
+                labelText: 'Preț inițial (lei)',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _discountController,
+              decoration: const InputDecoration(
+                labelText: 'Procentul reducerii (%)',
+              ),
+            ),
+            const SizedBox(height: 8),
+            DropdownButton<int>(
+              hint: const Text('Alege procent rapid'),
+              items: _optiuniProcent.map((procent) {
+                return DropdownMenuItem<int>(
+                  value: procent,
+                  child: Text('$procent%'),
+                );
+              }).toList(),
+              onChanged: (int? valoare) {
+                setState(() {
+                  _discountController.text = valoare.toString();
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
               onPressed: _calculateDiscount,
               child: const Text('Calculează'),
-           ),
-           Text(_result),
-        ],
+            ),
+            const SizedBox(height: 16),
+            Text(_result),
+          ],
+        ),
       ),
-  );
-}
+    );
+  }
 }
