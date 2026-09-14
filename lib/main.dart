@@ -11,61 +11,85 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Reducere calculator',
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const CalculatorReducerePage(),
     );
   }
 }
 //definește pagina si se poate schimba
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+class CalculatorReducerePage extends StatefulWidget {
+  const CalculatorReducerePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<CalculatorReducerePage> createState() => _CalculatorReducerePageState();
 }
 
 //logica de actualizarea
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _CalculatorReducerePageState extends State<CalculatorReducerePage> {
+  final TextEditingController _priceController=TextEditingController();
+  final TextEditingController _discountController=TextEditingController();
+  String _result='';
+  TipReducere _tipSelectat = TipReducere.procent;
 
-  void _incrementCounter() {
+  void _calculateDiscount() {
+    final double? price=double.tryParse(_priceController.text);
+    final double? discountPercent= double.tryParse(_discountController.text);
+
+    if (price==null || discountPercent==null){
+      setState(() {
+        _result="introdu valoare";
+      });
+      return;
+    }
+
+    final double discountValue=price*(discountPercent/100);
+    final double finalPrice=price-discountValue;
+
     setState(() {
-      _counter++;
+      _result=
+      'valoarea: ${discountValue.toStringAsFixed(2)} lei\n'
+      'pret final: ${finalPrice.toStringAsFixed(2)} lei\n';
     });
   }
-//interfata vizuala
+
+
+//controalele se clenuieste
+  @override
+  void dispose(){
+    _priceController.dispose();
+    _discountController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
-        title: Text(widget.title),
+     return Scaffold(
+     appBar: AppBar(title: const Text('Calculator de reducere')),
+     body: Column(
+     children: [
+       TextField(
+         controller: _priceController,
+         decoration: const InputDecoration(
+           labelText: 'Preț inițial (lei)',
+         ),
+       ),
+       const SizedBox(height: 12),
+       TextField(
+         controller: _discountController,
+         decoration: const InputDecoration(
+           labelText: 'Procentul reducerii (%)',
+         ),
+       ),
+           ElevatedButton(
+              onPressed: _calculateDiscount,
+              child: const Text('Calculează'),
+           ),
+           Text(_result),
+        ],
       ),
-      body: Center(
-
-        child: Column(
-
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+  );
+}
 }
